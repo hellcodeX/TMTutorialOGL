@@ -8,6 +8,7 @@ import org.lwjgl.util.vector.Vector3f;
 import renderEngine.DisplayManager;
 import renderEngine.Loader;
 import models.RawModel;
+import renderEngine.OBJLoader;
 import renderEngine.Renderer;
 import shaders.StaticShader;
 import textures.ModelTexture;
@@ -102,16 +103,18 @@ public class MainGameLoop {
 
         };
 
-        RawModel model = loader.loadToVAO(vertices, textureCoords, indices);
-        ModelTexture texture = new ModelTexture(loader.loadTexture("brick-wall"));
+//        RawModel model = loader.loadToVAO(vertices, textureCoords, indices);
+//        ModelTexture texture = new ModelTexture(loader.loadTexture("brick-wall"));
+        RawModel model = OBJLoader.loadObjModel("stall", loader);
+        ModelTexture texture = new ModelTexture(loader.loadTexture("stallTexture"));
         TexturedModel staticModel = new TexturedModel(model, texture);
 
-        Entity entity = new Entity(staticModel, new Vector3f(0, 0, -5), 0, 0, 0, 1);
+        Entity entity = new Entity(staticModel, new Vector3f(0, -3, -15), 0, 0, 0, 1);
 
         Camera camera = new Camera();
 
         while (!Display.isCloseRequested()) {
-            entity.increaseRotation(1, 1, 0);
+            entity.increaseRotation(0, 0.5f, 0);
             // game logic
             camera.move();
             renderer.prepare();
