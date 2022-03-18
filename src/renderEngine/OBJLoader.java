@@ -93,7 +93,7 @@ public class OBJLoader {
         System.out.println("Indices count: " + indices.size());
         System.out.println("Texture coordinates: " + textures.size());
         System.out.println("Normals count: " + normals.size());
-        return loader.loadToVAO(verticesArray, textureArray, indicesArray);
+        return loader.loadToVAO(verticesArray, textureArray, normalsArray, indicesArray);
     }
 
     private static void processVertex(String[] vertexData, List<Integer> indices, List<Vector2f> textures,
