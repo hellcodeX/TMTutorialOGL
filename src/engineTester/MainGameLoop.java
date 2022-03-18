@@ -16,6 +16,10 @@ import textures.ModelTexture;
 
 public class MainGameLoop {
 
+    private static long lastNanoTime;
+    private static int currentFPS;
+    private static int totalFrames;
+
     public static void main(String[] args) {
 
         DisplayManager.createDisplay();
@@ -120,6 +124,14 @@ public class MainGameLoop {
         Camera camera = new Camera();
 
         while (!Display.isCloseRequested()) {
+            totalFrames++;
+            if (System.nanoTime() > lastNanoTime + 1e9) {
+                lastNanoTime = System.nanoTime();
+                currentFPS = totalFrames;
+                totalFrames = 0;
+                System.out.println("FPS: " + currentFPS);
+            }
+
             entity.increaseRotation(0, 0.5f, 0);
             // game logic
             camera.move();
