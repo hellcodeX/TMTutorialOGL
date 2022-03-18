@@ -6,12 +6,8 @@ import entities.Light;
 import models.TexturedModel;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.util.vector.Vector3f;
-import renderEngine.DisplayManager;
-import renderEngine.Loader;
+import renderEngine.*;
 import models.RawModel;
-import renderEngine.OBJLoader;
-import renderEngine.Renderer;
-import shaders.StaticShader;
 import textures.ModelTexture;
 
 import java.util.ArrayList;
@@ -20,17 +16,11 @@ import java.util.Random;
 
 public class MainGameLoop {
 
-    private static long lastNanoTime;
-    private static int currentFPS;
-    private static int totalFrames;
-
     public static void main(String[] args) {
 
         DisplayManager.createDisplay();
 
         Loader loader = new Loader();
-        StaticShader shader = new StaticShader();
-        Renderer renderer = new Renderer(shader);
 
         RawModel model = OBJLoader.loadObjModel("box", loader);
         ModelTexture texture = new ModelTexture(loader.loadTexture("brick-wall"));
@@ -46,6 +36,7 @@ public class MainGameLoop {
         Random random = new Random();
 
         // 23 fps with 10000 cubes with no optimization
+        // 38 fps with 10000 cubes with optimization (new MasterRenderer class)
         for (int i = 0; i < 10000; i++) {
             float x = random.nextFloat() * 100 - 50;
             float y = random.nextFloat() * 100 - 50;
@@ -55,28 +46,21 @@ public class MainGameLoop {
                     random.nextFloat() * 180f, 0f, 1f));
         }
 
+        FPSCounter fpsCounter = FPSCounter.create();
+        MasterRenderer renderer = new MasterRenderer();
         while (!Display.isCloseRequested()) {
-            totalFrames++;
-            if (System.nanoTime() > lastNanoTime + 1e9) {
-                lastNanoTime = System.nanoTime();
-                currentFPS = totalFrames;
-                totalFrames = 0;
-                System.out.println("FPS: " + currentFPS);
-            }
             // game logic
             camera.move();
-            renderer.prepare();
-            shader.start();
-            shader.loadLight(light);
-            shader.loadViewMatrix(camera);
+
             for (Entity cube : allCubes) {
-                renderer.render(cube, shader);
+                renderer.processEntity(cube);
             }
-            shader.stop();
+            renderer.render(light, camera);
+            fpsCounter.count();
             DisplayManager.updateDisplay();
         }
 
-        shader.cleanUp();
+        renderer.cleanUp();
         loader.cleanUp();
         DisplayManager.closeDisplay();
     }
