@@ -14,6 +14,10 @@ import renderEngine.Renderer;
 import shaders.StaticShader;
 import textures.ModelTexture;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class MainGameLoop {
 
     private static long lastNanoTime;
@@ -28,100 +32,28 @@ public class MainGameLoop {
         StaticShader shader = new StaticShader();
         Renderer renderer = new Renderer(shader);
 
-//        float[] vertices = {
-//                -0.5f,0.5f,-0.5f,
-//                -0.5f,-0.5f,-0.5f,
-//                0.5f,-0.5f,-0.5f,
-//                0.5f,0.5f,-0.5f,
-//
-//                -0.5f,0.5f,0.5f,
-//                -0.5f,-0.5f,0.5f,
-//                0.5f,-0.5f,0.5f,
-//                0.5f,0.5f,0.5f,
-//
-//                0.5f,0.5f,-0.5f,
-//                0.5f,-0.5f,-0.5f,
-//                0.5f,-0.5f,0.5f,
-//                0.5f,0.5f,0.5f,
-//
-//                -0.5f,0.5f,-0.5f,
-//                -0.5f,-0.5f,-0.5f,
-//                -0.5f,-0.5f,0.5f,
-//                -0.5f,0.5f,0.5f,
-//
-//                -0.5f,0.5f,0.5f,
-//                -0.5f,0.5f,-0.5f,
-//                0.5f,0.5f,-0.5f,
-//                0.5f,0.5f,0.5f,
-//
-//                -0.5f,-0.5f,0.5f,
-//                -0.5f,-0.5f,-0.5f,
-//                0.5f,-0.5f,-0.5f,
-//                0.5f,-0.5f,0.5f
-//
-//        };
-//
-//        float[] textureCoords = {
-//
-//                0,0,
-//                0,1,
-//                1,1,
-//                1,0,
-//                0,0,
-//                0,1,
-//                1,1,
-//                1,0,
-//                0,0,
-//                0,1,
-//                1,1,
-//                1,0,
-//                0,0,
-//                0,1,
-//                1,1,
-//                1,0,
-//                0,0,
-//                0,1,
-//                1,1,
-//                1,0,
-//                0,0,
-//                0,1,
-//                1,1,
-//                1,0
-//
-//
-//        };
-//
-//
-//        int[] indices = {
-//                0,1,3,
-//                3,1,2,
-//                4,5,7,
-//                7,5,6,
-//                8,9,11,
-//                11,9,10,
-//                12,13,15,
-//                15,13,14,
-//                16,17,19,
-//                19,17,18,
-//                20,21,23,
-//                23,21,22
-//
-//        };
-//
-//        RawModel model = loader.loadToVAO(vertices, textureCoords, indices);
-//        ModelTexture texture = new ModelTexture(loader.loadTexture("brick-wall"));
-
-        RawModel model = OBJLoader.loadObjModel("dragon", loader);
-        ModelTexture texture = new ModelTexture(loader.loadTexture("yellow"));
+        RawModel model = OBJLoader.loadObjModel("box", loader);
+        ModelTexture texture = new ModelTexture(loader.loadTexture("brick-wall"));
         texture.setShineDumper(10);
         texture.setReflectivity(0);
-        TexturedModel staticModel = new TexturedModel(model, texture);
 
-        Entity entity = new Entity(staticModel, new Vector3f(0, -3, -25), 0, 0, 0, 1);
-        Light light = new Light(new Vector3f(200, 200, 100), new Vector3f(0.7f, 0.7f, 0.7f));
+        TexturedModel cubeModel = new TexturedModel(model, texture);
 
-
+        Light light = new Light(new Vector3f(3000, 2000, 3000), new Vector3f(1f, 1f, 1f));
         Camera camera = new Camera();
+
+        List<Entity> allCubes = new ArrayList<>();
+        Random random = new Random();
+
+        // 23 fps with 10000 cubes with no optimization
+        for (int i = 0; i < 10000; i++) {
+            float x = random.nextFloat() * 100 - 50;
+            float y = random.nextFloat() * 100 - 50;
+            float z = random.nextFloat() * -300;
+
+            allCubes.add(new Entity(cubeModel, new Vector3f(x, y, z), random.nextFloat() * 180f,
+                    random.nextFloat() * 180f, 0f, 1f));
+        }
 
         while (!Display.isCloseRequested()) {
             totalFrames++;
@@ -131,15 +63,15 @@ public class MainGameLoop {
                 totalFrames = 0;
                 System.out.println("FPS: " + currentFPS);
             }
-
-            entity.increaseRotation(0, 0.5f, 0);
             // game logic
             camera.move();
             renderer.prepare();
             shader.start();
             shader.loadLight(light);
             shader.loadViewMatrix(camera);
-            renderer.render(entity, shader);
+            for (Entity cube : allCubes) {
+                renderer.render(cube, shader);
+            }
             shader.stop();
             DisplayManager.updateDisplay();
         }
