@@ -30,7 +30,7 @@ public class Camera {
         if (Keyboard.isKeyDown(Keyboard.KEY_SPACE)) {
             position.y += 0.1f;
         }
-        if (Keyboard.isKeyDown(Keyboard.KEY_G)) {
+        if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL)) {
             position.y -= 0.1f;
         }
     }
